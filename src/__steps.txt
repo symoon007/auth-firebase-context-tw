@@ -1,0 +1,13 @@
+CONTEXT API 
+* Create context (export).
+* Create provider.
+* Set context value.
+* to access the value: useContext hook
+
+TO SHARE 
+* set AuthProviders to main.jsx file
+* inside provider access children props & then use it
+
+To Intregrqate 
+* break down the create user function
+* auth provider must have auth & pass email and password from register
