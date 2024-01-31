@@ -1,12 +1,12 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProviders";
-import Home from "./Home";
 
 const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { signIn } = useContext(AuthContext);
+  const emailRef = useRef();
+  const { signIn, passwordReset, GoogleSignIn } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,24 +26,54 @@ const Login = () => {
     setSuccess("");
 
     signIn(formData.email, formData.password)
-      .then(() => {
-        setSuccess("Login successful!");
+      .then((result) => {
+        const loggedUser = result.user;
+        if (!loggedUser.emailVerified) {
+          alert("Verifiy your email to login");
+          return;
+        }
+        setSuccess(
+          <div className="alert alert-success">
+            <span>Logged in successfully.</span>
+          </div>
+        );
         setFormData({
           email: "",
           password: "",
         });
 
         setTimeout(() => {
-          setSuccess('')
+          setSuccess("");
         }, 5000);
-        
       })
       .catch(() => {
         setError("Login Failed! Check Email or Password");
-          setTimeout(() => {
-            setError("");
-          }, 5000);
+        setTimeout(() => {
+          setError("");
+        }, 5000);
       });
+  };
+  const handleGoogleLogin = () => {
+    GoogleSignIn()
+    .then(() => {})
+    .catch((error) =>console.log(error))
+  }
+  
+
+  const handleResetPassword = () => {
+    const email = emailRef.current?.value;
+
+    {
+      !email
+        ? alert("Provide your email address")
+        : passwordReset(email)
+            .then(() => {
+              alert("Password Reset email sent!");
+            })
+            .catch((error) => {
+              console.log(error.message);
+            });
+    }
   };
 
   return (
@@ -60,6 +90,7 @@ const Login = () => {
               </label>
               <input
                 type="email"
+                ref={emailRef}
                 value={formData.email}
                 placeholder="email"
                 name="email"
@@ -81,7 +112,7 @@ const Login = () => {
                 onChange={handleInputValue}
                 required
               />
-              <label className="label">
+              <label onClick={handleResetPassword} className="label">
                 <a href="#" className="label-text-alt link link-hover">
                   Forgot password?
                 </a>
@@ -90,6 +121,7 @@ const Login = () => {
             <div className="form-control mt-6">
               <button className="btn btn-primary">Login</button>
             </div>
+
             {success && <p>{success}</p>}
             {error && <p>{error}</p>}
 
@@ -100,6 +132,11 @@ const Login = () => {
               </Link>
             </span>
           </form>
+          <div className="form-control mt-6 p-4">
+            <button onClick={handleGoogleLogin} className="btn btn-outline btn-primary">
+              Google Sign In
+            </button>
+          </div>
         </div>
       </div>
     </div>

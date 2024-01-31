@@ -1,11 +1,12 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProviders";
+import { sendEmailVerification } from "firebase/auth";
 
 const Register = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { user, createUser } = useContext(AuthContext);
+  const { user, createUser, sendMailVerification } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,12 +30,17 @@ const Register = () => {
       .then((result) => {
         const loggedUser = result.user;
         console.log(loggedUser);
-        setSuccess("User Created  Successfully!");
+        setSuccess(
+          <div className="alert alert-success">
+            <span>User created successfully.</span>
+          </div>
+        );
         setFormData({
           name: "",
           email: "",
           password: "",
         });
+        sendMailVerification(result.user)
          setTimeout(() => {
            setSuccess("");
          }, 5000);
@@ -46,7 +52,20 @@ const Register = () => {
             setError("");
           }, 5000);
       });
+
+     const sendMailVerification = (user) => {
+       sendEmailVerification(user)
+         .then((result) => {
+           console.log(result);
+           alert("Verify Your Email firstly");
+         })
+         .catch((error) => {
+           setError(error.message);
+         });
+     };
+
   };
+  sendMailVerification;(user)
   return (
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col">
